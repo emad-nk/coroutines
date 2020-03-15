@@ -5,5 +5,23 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.coroutineContext
 
 suspend fun loadContributorsNotCancellable(service: GitHubService, req: RequestData): List<User> {
-    TODO()
+    val repos = service
+        .getOrgRepos(req.org)
+        .also { logRepos(req, it) }
+        .body() ?: listOf()
+
+    val deferreds: List<Deferred<List<User>>> = repos.map { repo ->
+        GlobalScope.async {
+            // #2
+            repos.flatMap { repo ->
+                service
+                    .getRepoContributors(req.org, repo.name)
+                    .also { logUsers(repo, it) }
+                    .bodyList()
+            }
+        }
+    }
+
+    return deferreds.awaitAll().flatten().aggregate()
+
 }

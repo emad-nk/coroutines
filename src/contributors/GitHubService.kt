@@ -17,6 +17,8 @@ import retrofit2.http.Path
 import java.util.*
 
 interface GitHubService {
+    // getOrgReposCall & getRepoContributorsCall declarations
+
     @GET("orgs/{org}/repos?per_page=100")
     fun getOrgReposCall(
         @Path("org") org: String
@@ -27,6 +29,17 @@ interface GitHubService {
         @Path("owner") owner: String,
         @Path("repo") repo: String
     ): Call<List<User>>
+
+    @GET("orgs/{org}/repos?per_page=100")
+    suspend fun getOrgRepos(
+        @Path("org") org: String
+    ): Response<List<Repo>>
+
+    @GET("repos/{owner}/{repo}/contributors?per_page=100")
+    suspend fun getRepoContributors(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String
+    ): Response<List<User>>
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
